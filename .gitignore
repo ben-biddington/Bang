@@ -1,0 +1,5 @@
+bin/
+debug/
+obj/
+*.suo
+_ReSharper.Bang/
