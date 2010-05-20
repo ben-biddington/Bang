@@ -10,7 +10,7 @@ Examples
 
     Net.Stat("-n", Lines.Matching("^Active Connections"));
 
-See: [the executable examples netstat][1]	
+See: [the executable examples][1]	
 
 ### List all shares
 
