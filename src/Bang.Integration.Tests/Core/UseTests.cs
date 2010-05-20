@@ -34,6 +34,32 @@ namespace Bang.Integration.Tests.Core {
 		[SetUp]
 		public void SetUp() {
 			_result = null;
+			Given_there_is_test_data_available();
+		}
+
+		private void Given_there_is_test_data_available() {
+			Assert.That(
+				Who.UserName, Is.Not.Empty,
+				"Ensure you have supplied something for the <{0}> appSetting.", 
+				"Credential.Username"
+			);
+
+			Assert.That(
+				Who.Password, Is.Not.Empty,
+				"Ensure you have supplied something for the <{0}> appSetting.",
+				"Credential.Password"
+			);
+
+			Assert.That(
+				Resource, Is.Not.Empty,
+				"{0}Ensure you have supplied something for the <{1}> appSetting. " + 
+				"{0}This should be a share that is available to the user " + 
+				"identified by the <{2}> and <{3}> appSettings.",
+				Environment.NewLine,
+				"Example.Share",
+				"Credential.Username",
+				"Credential.Password"
+			);
 		}
 
 		[Test]
