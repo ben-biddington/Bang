@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bang", "src\Bang\Bang.csproj", "{0443FDCE-1641-4CE1-A3C3-1D9C7D7EB0FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bang.Integration.Tests", "src\Bang.Integration.Tests\Bang.Integration.Tests.csproj", "{45180685-D0BA-4344-B493-B3452A9BAB99}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bang.Integration.Tests", "test\Bang.Integration.Tests\Bang.Integration.Tests.csproj", "{45180685-D0BA-4344-B493-B3452A9BAB99}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
