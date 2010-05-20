@@ -2,4 +2,6 @@ bin/
 debug/
 obj/
 *.suo
+*.html
+*.user
 _ReSharper.Bang/
