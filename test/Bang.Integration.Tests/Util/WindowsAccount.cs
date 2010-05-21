@@ -12,6 +12,7 @@ namespace Bang.Integration.Tests.Util {
 
 			var newUser = Add(who);
 			AddToGroup(newUser, "Guests");
+			AddToGroup(newUser, "Users");
 
 			return newUser;
 		}
@@ -48,12 +49,6 @@ namespace Bang.Integration.Tests.Util {
 
 		private static Boolean Exists(NetworkCredential who) {
 			return DirectoryEntry.Exists(LocalMachine + "/" + who.UserName);
-		}
-
-		private static Boolean IsMemberOf(DirectoryEntry who, String group) {
-			string path = LocalMachine + "/" + group+ "/" + "chubbs.peterson";
-
-			return DirectoryEntry.Exists(path);
 		}
 
 		private static String LocalMachine {

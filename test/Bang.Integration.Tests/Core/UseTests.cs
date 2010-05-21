@@ -164,7 +164,7 @@ namespace Bang.Integration.Tests.Core {
 
 		private void Given_the_example_share_is_available() {
 			if (false == Net.Contains(Resource)) {
-				var thePath = String.Format(@"C:\temp\testshare\{0}", Guid.NewGuid());
+				var thePath = String.Format(@"C:\temp\testshare\{0}", "sir.chubbsalot");
 
 				if (false == Directory.Exists(thePath)) {
 					Directory.CreateDirectory(thePath);
@@ -180,7 +180,7 @@ namespace Bang.Integration.Tests.Core {
 					result.Message.Trim() != "The command completed successfully." && 
 					result.Message.Trim() != "The command failed: 2118"
 				)
-					throw new Exception(result.Error);
+					throw new Exception(result.Message);
 			}
 		}
 
