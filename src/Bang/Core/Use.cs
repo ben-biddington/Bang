@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Text.RegularExpressions;
+using Bang.IO.Pipes;
 using Bang.Lang;
 using Bang.Process;
 
@@ -52,16 +53,20 @@ namespace Bang.Core {
 
 		private static NetResult Run(String arguments, params Object[] args) {
 			var theArgs = String.Format(arguments, args);
+			
+			var pipe = new SimplePipe();
 
 			using (var process = ProcessFactory.New("net.exe", theArgs)) {
 				process.Start();
+				
+				pipe.ConnectTo(process);
 
 				Wait.On(process, Timeout);
 
 				return new NetResult(
 					process.ExitCode,
-					process.StandardOutput.ReadToEnd(),
-					process.StandardError.ReadToEnd()
+					pipe.StdOut(),
+					pipe.StdErr()
 				);
 			}
 		}

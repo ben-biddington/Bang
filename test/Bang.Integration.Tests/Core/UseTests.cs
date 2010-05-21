@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Configuration;
-using System.Diagnostics;
-using System.DirectoryServices;
 using System.IO;
 using System.Net;
-using System.Security.AccessControl;
-using System.Threading;
 using Bang.Core;
 using Bang.Integration.Tests.Util;
 using Bang.Process;
@@ -18,6 +14,8 @@ namespace Bang.Integration.Tests.Core {
 	public class UseTests : IntegrationTest {
 		private const Int32 OK = 0;
 		private NetResult _result;
+
+		private const String EXAMPLE_SHARE_NAME = "example.bang.share";
 
 		private TimeSpan GracePeriod {
 			get { return TimeSpan.FromSeconds(10);  }
@@ -33,7 +31,7 @@ namespace Bang.Integration.Tests.Core {
 		}
 
 		private string Resource {
-			get { return "exampleshare"; }
+			get { return String.Format(@"\\{0}\{1}", Environment.MachineName, EXAMPLE_SHARE_NAME); }
 		}
 
 		[SetUp]
@@ -158,62 +156,31 @@ namespace Bang.Integration.Tests.Core {
 		private void Given_there_is_test_data_available() {
 			Given_the_example_user_exists();
 			Given_the_example_share_is_available();
-
-			//Assert.That(
-			//    Who.UserName, Is.Not.Empty,
-			//    "Ensure you have supplied something for the <{0}> appSetting.",
-			//    "Credential.Username"
-			//);
-
-			//Assert.That(
-			//    Who.Password, Is.Not.Empty,
-			//    "Ensure you have supplied something for the <{0}> appSetting.",
-			//    "Credential.Password"
-			//);
-
-			//Assert.That(
-			//    Resource, Is.Not.Empty,
-			//    "{0}Ensure you have supplied something for the <{1}> appSetting. " +
-			//    "{0}This should be a share that is available to the user " +
-			//    "identified by the <{2}> and <{3}> appSettings.",
-			//    Environment.NewLine,
-			//    "Example.Share",
-			//    "Credential.Username",
-			//    "Credential.Password"
-			//);
 		}
 
 		private void Given_the_example_user_exists() {
 			WindowsAccount.Ensure(Who, "Guests");
-			//var dir = new DirectoryEntry("WinNT://" + Environment.MachineName + ",computer");
-
-			//var theUserExists = dir.Children.Find(Who.UserName) != null;
-
-			//if (theUserExists)
-			//    return;
-
-			//var user = dir.Children.Add(Who.UserName, "user");
-
-			//user.Invoke("SetPassword", Who.Password);
-			//user.Invoke("Put", "Description", "Test User from Bang.Net");
-			//user.CommitChanges();
-
-			//DirectoryEntry guestGroup = dir.Children.Find("Guests", "group");
-
-			//if (guestGroup != null) {
-			//    guestGroup.Invoke("Add", user.Path);
-			//}
 		}
 
 		private void Given_the_example_share_is_available() {
 			if (false == Net.Contains(Resource)) {
-				var thePath = String.Format(@"C:\{0}", Guid.NewGuid());
+				var thePath = String.Format(@"C:\temp\testshare\{0}", Guid.NewGuid());
 
-				Directory.CreateDirectory(thePath);
+				if (false == Directory.Exists(thePath)) {
+					Directory.CreateDirectory(thePath);
+				}
 
-				var result = new RmtShare("res\\RMTSHARE.EXE").New(Environment.MachineName, Resource, thePath);
-
-				Console.WriteLine(result.Message);
+				var result = new RmtShare("res\\RMTSHARE.EXE").New(
+					Environment.MachineName,
+					EXAMPLE_SHARE_NAME, 
+					thePath
+				);
+			
+				if (
+					result.Message.Trim() != "The command completed successfully." && 
+					result.Message.Trim() != "The command failed: 2118"
+				)
+					throw new Exception(result.Error);
 			}
 		}
 
@@ -248,11 +215,11 @@ namespace Bang.Integration.Tests.Core {
 		}
 
 		private void Then_connection_is_added_successfully() {
+			Then_process_exits_with_status(OK);
+			
 			Then_message(Is.EqualTo("The command completed successfully."));
 
 			Then_connection_exists();
-
-			Then_process_exits_with_status(OK);
 		}
 
 		private void Then_process_exits_with_status(Int32 exitCode) {
