@@ -2,6 +2,10 @@ using System;
 
 namespace Bang.Lang {
 	public static class Wait {
+		public static void On(System.Diagnostics.Process process) {
+			On(process, TimeSpan.FromSeconds(17));
+		}
+
 		public static void On(System.Diagnostics.Process process, TimeSpan forHowLong) {
 			var timeoutInMilliseconds = Convert.ToInt32(forHowLong.TotalMilliseconds);
 

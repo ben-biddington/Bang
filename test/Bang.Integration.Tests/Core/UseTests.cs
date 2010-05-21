@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Configuration;
+using System.Diagnostics;
+using System.DirectoryServices;
 using System.IO;
 using System.Net;
+using System.Security.AccessControl;
+using System.Threading;
 using Bang.Core;
+using Bang.Integration.Tests.Util;
 using Bang.Process;
 using NUnit.Framework;
 using NUnit.Framework.Constraints;
@@ -28,38 +33,13 @@ namespace Bang.Integration.Tests.Core {
 		}
 
 		private string Resource {
-			get { return ConfigurationManager.AppSettings["Example.Share"]; }
+			get { return "exampleshare"; }
 		}
 
 		[SetUp]
 		public void SetUp() {
 			_result = null;
 			Given_there_is_test_data_available();
-		}
-
-		private void Given_there_is_test_data_available() {
-			Assert.That(
-				Who.UserName, Is.Not.Empty,
-				"Ensure you have supplied something for the <{0}> appSetting.", 
-				"Credential.Username"
-			);
-
-			Assert.That(
-				Who.Password, Is.Not.Empty,
-				"Ensure you have supplied something for the <{0}> appSetting.",
-				"Credential.Password"
-			);
-
-			Assert.That(
-				Resource, Is.Not.Empty,
-				"{0}Ensure you have supplied something for the <{1}> appSetting. " + 
-				"{0}This should be a share that is available to the user " + 
-				"identified by the <{2}> and <{3}> appSettings.",
-				Environment.NewLine,
-				"Example.Share",
-				"Credential.Username",
-				"Credential.Password"
-			);
 		}
 
 		[Test]
@@ -173,6 +153,68 @@ namespace Bang.Integration.Tests.Core {
 			Then_process_exits_with_status(2);
 			Then_process_is_not_running();
 			Then_error(Is.EqualTo(theExpectedError));
+		}
+
+		private void Given_there_is_test_data_available() {
+			Given_the_example_user_exists();
+			Given_the_example_share_is_available();
+
+			//Assert.That(
+			//    Who.UserName, Is.Not.Empty,
+			//    "Ensure you have supplied something for the <{0}> appSetting.",
+			//    "Credential.Username"
+			//);
+
+			//Assert.That(
+			//    Who.Password, Is.Not.Empty,
+			//    "Ensure you have supplied something for the <{0}> appSetting.",
+			//    "Credential.Password"
+			//);
+
+			//Assert.That(
+			//    Resource, Is.Not.Empty,
+			//    "{0}Ensure you have supplied something for the <{1}> appSetting. " +
+			//    "{0}This should be a share that is available to the user " +
+			//    "identified by the <{2}> and <{3}> appSettings.",
+			//    Environment.NewLine,
+			//    "Example.Share",
+			//    "Credential.Username",
+			//    "Credential.Password"
+			//);
+		}
+
+		private void Given_the_example_user_exists() {
+			WindowsAccount.Ensure(Who, "Guests");
+			//var dir = new DirectoryEntry("WinNT://" + Environment.MachineName + ",computer");
+
+			//var theUserExists = dir.Children.Find(Who.UserName) != null;
+
+			//if (theUserExists)
+			//    return;
+
+			//var user = dir.Children.Add(Who.UserName, "user");
+
+			//user.Invoke("SetPassword", Who.Password);
+			//user.Invoke("Put", "Description", "Test User from Bang.Net");
+			//user.CommitChanges();
+
+			//DirectoryEntry guestGroup = dir.Children.Find("Guests", "group");
+
+			//if (guestGroup != null) {
+			//    guestGroup.Invoke("Add", user.Path);
+			//}
+		}
+
+		private void Given_the_example_share_is_available() {
+			if (false == Net.Contains(Resource)) {
+				var thePath = String.Format(@"C:\{0}", Guid.NewGuid());
+
+				Directory.CreateDirectory(thePath);
+
+				var result = new RmtShare("res\\RMTSHARE.EXE").New(Environment.MachineName, Resource, thePath);
+
+				Console.WriteLine(result.Message);
+			}
 		}
 
 		private void Given_computer_is_connected_to_resource() {
