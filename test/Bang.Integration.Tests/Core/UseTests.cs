@@ -54,7 +54,7 @@ namespace Bang.Integration.Tests.Core {
 				Net.Delete(Resource);
 
 				Wait.Patiently.ForUpTo(TimeSpan.FromSeconds(30)).Until(() =>
-					false == Net.Contains(Resource)                                                     	
+					false == Net.Contains(Resource)
 				);
 
 				TestSharedDir.Delete(true);
@@ -89,10 +89,12 @@ namespace Bang.Integration.Tests.Core {
 		}
 
 		[Test]
-		public void Adding_a_connection_without_a_required_username_returns_error() {
+		public void Adding_a_connection_with_invalid_credential_returns_error() {
 			Given_computer_is_not_connected_to_resource();
 
-			When_connecting_without_supplying_credential();
+			Given_the_example_share_is_not_available();
+
+			When_connection_added();
 
 			Then_process_exits_with_status(2);
 
@@ -196,6 +198,10 @@ namespace Bang.Integration.Tests.Core {
 			}
 		}
 
+		private void Given_the_example_share_is_not_available() {
+			ICacls.Remove(TestSharedDir, Who, "F");
+		}
+
 		private void Given_computer_is_connected_to_resource() {
 			Use.Ensure(Resource, Who);
 		}
@@ -222,8 +228,8 @@ namespace Bang.Integration.Tests.Core {
 			_result = Net.Ensure(Resource, Who);
 		}
 
-		private void When_connecting_without_supplying_credential() {
-			_result = Net.Use(Resource);
+		private void When_connecting_with_invalid_credential() {
+			_result = Net.Use(Resource, Who);
 		}
 
 		private void Then_connection_is_added_successfully() {
@@ -255,7 +261,6 @@ namespace Bang.Integration.Tests.Core {
 
 		private void Then_connection_does_not_exist() {
 			Assert.That(Use.Contains(Resource), Is.False);
-			Assert.That(Directory.Exists(Resource), Is.False);
 		}
 
 		private void Then_some_text_is_returned() {

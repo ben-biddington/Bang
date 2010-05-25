@@ -8,8 +8,27 @@ using Bang.Process;
 namespace Bang.Integration.Tests.Util {
 	public class ICacls {
 		public static NetResult Grant(DirectoryInfo dir, NetworkCredential user, String permission) {
-			//icacls shared /grant :r Benito\test:
-			return Run("{0} /grant {1}\\{2}:{3}", dir.FullName, user.Domain, user.UserName, permission);
+			return Go("grant", dir, user, permission);
+		}
+
+		public static NetResult Remove(DirectoryInfo dir, NetworkCredential user, String permission) {
+			return Go("remove", dir, user, permission);
+		}
+
+		private static NetResult Go(
+			String operation, 
+			FileSystemInfo dir, 
+			NetworkCredential user, 
+			String permission
+		) {
+			return Run(
+				"{0} /{1} {2}\\{3}:{4}", 
+				operation, 
+				dir.FullName, 
+				user.Domain, 
+				user.UserName, 
+				permission
+			);
 		}
 
 		private static NetResult Run(String arguments, params Object[] args) {
