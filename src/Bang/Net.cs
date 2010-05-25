@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using Bang.Process;
 
@@ -26,6 +27,10 @@ namespace Bang {
 
 		public static NetResult List() {
 			return Core.Use.List();
+		}
+
+		public static NetResult Share(String name, DirectoryInfo dir) {
+			return Core.Use.Share(name, dir);
 		}
 	}
 

@@ -16,6 +16,7 @@ namespace Bang.Integration.Tests.Core {
 		private NetResult _result;
 
 		private const String EXAMPLE_SHARE_NAME = "example.bang.share";
+		private const String EXAMPLE_USER_NAME = "sir.chubbsalot";
 
 		private TimeSpan GracePeriod {
 			get { return TimeSpan.FromSeconds(10);  }
@@ -25,8 +26,15 @@ namespace Bang.Integration.Tests.Core {
 			get {
 				return new NetworkCredential(
 					ConfigurationManager.AppSettings["Credential.Username"],
-					ConfigurationManager.AppSettings["Credential.Password"]
+					ConfigurationManager.AppSettings["Credential.Password"], 
+					Environment.MachineName
 				);
+			}
+		}
+		
+		private DirectoryInfo TestSharedDir {
+			get {
+				return new DirectoryInfo(String.Format(@"C:\temp\testshare\{0}", EXAMPLE_USER_NAME));
 			}
 		}
 
@@ -38,6 +46,19 @@ namespace Bang.Integration.Tests.Core {
 		public void SetUp() {
 			_result = null;
 			Given_there_is_test_data_available();
+		}
+
+		[TearDown]
+		public void TearDown() {
+			if (TestSharedDir.Exists) {
+				Net.Delete(Resource);
+
+				Wait.Patiently.ForUpTo(TimeSpan.FromSeconds(30)).Until(() =>
+					false == Net.Contains(Resource)                                                     	
+				);
+
+				TestSharedDir.Delete(true);
+			}
 		}
 
 		[Test]
@@ -164,23 +185,14 @@ namespace Bang.Integration.Tests.Core {
 
 		private void Given_the_example_share_is_available() {
 			if (false == Net.Contains(Resource)) {
-				var thePath = String.Format(@"C:\temp\testshare\{0}", "sir.chubbsalot");
-
-				if (false == Directory.Exists(thePath)) {
-					Directory.CreateDirectory(thePath);
+				if (false == TestSharedDir.Exists) {
+					TestSharedDir.Create();
 				}
 
-				var result = new RmtShare("res\\RMTSHARE.EXE").New(
-					Environment.MachineName,
-					EXAMPLE_SHARE_NAME, 
-					thePath
-				);
-			
-				if (
-					result.Message.Trim() != "The command completed successfully." && 
-					result.Message.Trim() != "The command failed: 2118"
-				)
-					throw new Exception(result.Message);
+				// TODO: Add Net.Share.List so we only do this once.
+				Net.Share(EXAMPLE_SHARE_NAME, TestSharedDir);
+
+				ICacls.Grant(TestSharedDir, Who, "F");
 			}
 		}
 

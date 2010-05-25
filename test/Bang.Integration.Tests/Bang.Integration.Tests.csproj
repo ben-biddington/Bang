@@ -58,7 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Util\RmtShare.cs" />
+    <Compile Include="Util\ICacls.cs" />
     <Compile Include="IntegrationTest.cs" />
     <Compile Include="Core\StatTests.cs" />
     <Compile Include="Core\UseTests.cs" />

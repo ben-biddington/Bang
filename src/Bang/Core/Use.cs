@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
 using Bang.IO.Pipes;
@@ -29,8 +30,9 @@ namespace Bang.Core {
 
 		public static NetResult Go(String resource, NetworkCredential credential) {
 			return Run(
-				@"use {0} /USER:{1} {2}",
+				@"use {0} /USER:{1}\{2} {3}",
 				resource,
+				credential.Domain,
 				credential.UserName,
 				credential.Password
 			);
@@ -49,6 +51,10 @@ namespace Bang.Core {
 
 		public static NetResult List() {
 			return Run("use");
+		}
+
+		public static NetResult Share(String name, DirectoryInfo dir) {
+			return Run("share {0}", String.Format("\"{0}\"=\"{1}\"", name, dir.FullName));
 		}
 
 		private static NetResult Run(String arguments, params Object[] args) {
