@@ -15,6 +15,13 @@ namespace Bang.Integration.Tests.Util {
 			return Go("remove", dir, user, permission);
 		}
 
+		public static NetResult Reset(DirectoryInfo dir) {
+			return Run(
+				"/reset {0}",
+				dir.FullName
+			);
+		}
+
 		private static NetResult Go(
 			String operation, 
 			FileSystemInfo dir, 

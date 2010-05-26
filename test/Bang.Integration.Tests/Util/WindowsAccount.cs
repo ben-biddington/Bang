@@ -4,16 +4,20 @@ using System.Net;
 
 namespace Bang.Integration.Tests.Util {
 	public class WindowsAccount {
-		public static DirectoryEntry Ensure(NetworkCredential who, String group) {
+		public static DirectoryEntry Ensure(NetworkCredential who, params String[] groups) {
 			var localComputer = LocalComputer();
 			
 			if (Exists(who))
 				return Get(who, localComputer);
 
 			var newUser = Add(who);
-			AddToGroup(newUser, "Guests");
-			AddToGroup(newUser, "Users");
 
+			foreach (var group in groups) {
+				if (group != null) {
+					AddToGroup(newUser, group);
+				}	
+			}
+			
 			return newUser;
 		}
 

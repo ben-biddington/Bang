@@ -31,6 +31,16 @@ namespace Bang.Integration.Tests.Core {
 				);
 			}
 		}
+
+		private NetworkCredential AUserWithNoRightsAnywhere {
+			get {
+				return new NetworkCredential(
+					"I_have_no_rights",
+					ConfigurationManager.AppSettings["Credential.Password"],
+					Environment.MachineName
+				);
+			}
+		}
 		
 		private DirectoryInfo TestSharedDir {
 			get {
@@ -42,6 +52,8 @@ namespace Bang.Integration.Tests.Core {
 			get { return String.Format(@"\\{0}\{1}", Environment.MachineName, EXAMPLE_SHARE_NAME); }
 		}
 
+		private Boolean Clean { get { return false; } }
+
 		[SetUp]
 		public void SetUp() {
 			_result = null;
@@ -50,14 +62,20 @@ namespace Bang.Integration.Tests.Core {
 
 		[TearDown]
 		public void TearDown() {
-			if (TestSharedDir.Exists) {
-				Net.Delete(Resource);
+			if (Clean) {
+				if (TestSharedDir.Exists) {
+					Net.Delete(Resource);
 
-				Wait.Patiently.ForUpTo(TimeSpan.FromSeconds(30)).Until(() =>
-					false == Net.Contains(Resource)
-				);
+					Wait.
+						Patiently.
+						ForUpTo(TimeSpan.FromSeconds(30)).
+						PollingEvery(TimeSpan.FromSeconds(1)).
+						Until(() 
+							=> false == Net.Contains(Resource)
+						);
 
-				TestSharedDir.Delete(true);
+					TestSharedDir.Delete(true);
+				}
 			}
 		}
 
@@ -85,28 +103,30 @@ namespace Bang.Integration.Tests.Core {
 
 			Then_process_exits_with_status(OK);
 
+			Then_connection_exists();
+
 			Then_process_is_not_running();
 		}
 
+		// TEST: Can_add_a_connection_that_user_does_not_have_read_permissions_on
+
 		[Test]
-		public void Adding_a_connection_with_invalid_credential_returns_error() {
+		public void Connecting_with_nonexistent_user_returns_error() {
 			Given_computer_is_not_connected_to_resource();
 
-			Given_the_example_share_is_not_available();
-
-			When_connection_added();
+			When_connection_added_as(new NetworkCredential("xxx", "xxx", Environment.MachineName));
 
 			Then_process_exits_with_status(2);
 
+			var expectedError = 
+				"System error 1326 has occurred.\r\n\r\n"+ 
+				"Logon failure: unknown user name or bad password.";
+
+			Then_message(Is.Empty);
+
+			Then_error(Is.EqualTo(expectedError));
+
 			Then_connection_does_not_exist();
-
-			var expectedError = String.Format(
-				"The password or user name is invalid for {0}.\n\n" +
-				"Enter the user name for '10.200.0.12': ",
-				Resource
-			);
-
-			Then_message(Is.StringStarting(expectedError));
 		}
 
 		[Test]
@@ -178,11 +198,16 @@ namespace Bang.Integration.Tests.Core {
 
 		private void Given_there_is_test_data_available() {
 			Given_the_example_user_exists();
+			//Given_the_no_rights_user_exists();
 			Given_the_example_share_is_available();
 		}
 
+		private void Given_the_no_rights_user_exists() {
+			WindowsAccount.Ensure(AUserWithNoRightsAnywhere, "Guests");
+		}
+
 		private void Given_the_example_user_exists() {
-			WindowsAccount.Ensure(Who, "Guests");
+			WindowsAccount.Ensure(Who);
 		}
 
 		private void Given_the_example_share_is_available() {
@@ -196,10 +221,6 @@ namespace Bang.Integration.Tests.Core {
 
 				ICacls.Grant(TestSharedDir, Who, "F");
 			}
-		}
-
-		private void Given_the_example_share_is_not_available() {
-			ICacls.Remove(TestSharedDir, Who, "F");
 		}
 
 		private void Given_computer_is_connected_to_resource() {
@@ -217,7 +238,11 @@ namespace Bang.Integration.Tests.Core {
 		}
 
 		private void When_connection_added() {
-			_result = Net.Use(Resource, Who);
+			When_connection_added_as(Who);
+		}
+
+		private void When_connection_added_as(NetworkCredential who) {
+			_result = Net.Use(Resource, who);
 		}
 
 		private void When_connection_deleted() {
@@ -226,10 +251,6 @@ namespace Bang.Integration.Tests.Core {
 
 		private void When_connection_is_ensured() {
 			_result = Net.Ensure(Resource, Who);
-		}
-
-		private void When_connecting_with_invalid_credential() {
-			_result = Net.Use(Resource, Who);
 		}
 
 		private void Then_connection_is_added_successfully() {
@@ -244,7 +265,8 @@ namespace Bang.Integration.Tests.Core {
 			Then_process_is_not_running();
 			Assert.That(
 				_result.ExitCode, Is.EqualTo(exitCode),
-				"Expected the process to have exited with code <{0}>, but it was <{1}>.\r\n" + 
+				"Expected the process to have exited with code <{0}>, but " + 
+				"it was <{1}>.\r\n" + 
 				"Message: {2}\r\n" + 
 				"Error: {3}",
 				exitCode, 
@@ -256,7 +278,9 @@ namespace Bang.Integration.Tests.Core {
 
 		private void Then_connection_exists() {
 			Assert.That(Use.Contains(Resource), Is.True);
-			Assert.That(Directory.Exists(Resource), Is.True);
+			Assert.That(Directory.Exists(Resource), Is.True,
+				"The directory <{0}> does not exist.", Resource
+			);
 		}
 
 		private void Then_connection_does_not_exist() {
