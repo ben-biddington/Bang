@@ -31,16 +31,6 @@ namespace Bang.Integration.Tests.Core {
 				);
 			}
 		}
-
-		private NetworkCredential AUserWithNoRightsAnywhere {
-			get {
-				return new NetworkCredential(
-					"I_have_no_rights",
-					ConfigurationManager.AppSettings["Credential.Password"],
-					Environment.MachineName
-				);
-			}
-		}
 		
 		private DirectoryInfo TestSharedDir {
 			get {
@@ -52,7 +42,7 @@ namespace Bang.Integration.Tests.Core {
 			get { return String.Format(@"\\{0}\{1}", Environment.MachineName, EXAMPLE_SHARE_NAME); }
 		}
 
-		private Boolean Clean { get { return false; } }
+		private Boolean Clean { get { return true; } }
 
 		[SetUp]
 		public void SetUp() {
@@ -66,14 +56,31 @@ namespace Bang.Integration.Tests.Core {
 				if (TestSharedDir.Exists) {
 					Net.Delete(Resource);
 
-					Wait.
-						Patiently.
+					Wait.Patiently.
 						ForUpTo(TimeSpan.FromSeconds(30)).
 						PollingEvery(TimeSpan.FromSeconds(1)).
 						Until(() 
 							=> false == Net.Contains(Resource)
 						);
 
+					TestSharedDir.Delete(true);
+				}
+			}
+		}
+
+		[TestFixtureTearDown]
+		public void FinalTearDown() {
+			if (Clean) {
+				Console.WriteLine("Deleting user: {0}\\{1}", Who.Domain, Who.UserName);
+				WindowsAccount.Delete(Who);
+
+				if (Net.Contains(Resource)) {
+					Console.WriteLine("Deleting share: {0}", Resource);
+					Net.Delete(Resource);
+				}
+
+				if (TestSharedDir.Exists) {
+					Console.WriteLine("Deleting temp directory: {0}", TestSharedDir.FullName);
 					TestSharedDir.Delete(true);
 				}
 			}
@@ -200,12 +207,7 @@ namespace Bang.Integration.Tests.Core {
 
 		private void Given_there_is_test_data_available() {
 			Given_the_example_user_exists();
-			//Given_the_no_rights_user_exists();
 			Given_the_example_share_is_available();
-		}
-
-		private void Given_the_no_rights_user_exists() {
-			WindowsAccount.Ensure(AUserWithNoRightsAnywhere, "Guests");
 		}
 
 		private void Given_the_example_user_exists() {
