@@ -115,7 +115,11 @@ namespace Bang.Integration.Tests.Core {
 			Then_process_is_not_running();
 		}
 
-		// TEST: Can_add_a_connection_that_user_does_not_have_read_permissions_on
+		
+		[Test, Ignore("PENDING")]
+		public void Can_add_a_connection_that_user_does_not_have_read_permissions_on() {
+			Assert.Fail("PENDING");
+		}
 
 		[Test]
 		public void Connecting_with_nonexistent_user_returns_error() {
