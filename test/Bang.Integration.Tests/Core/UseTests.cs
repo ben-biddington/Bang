@@ -118,9 +118,11 @@ namespace Bang.Integration.Tests.Core {
 
 			Then_process_exits_with_status(2);
 
-			var expectedError = 
-				"System error 1326 has occurred.\r\n\r\n"+ 
-				"Logon failure: unknown user name or bad password.";
+			var expectedError = String.Format(
+				"System error 1326 has occurred.{0}{0}"+
+				"Logon failure: unknown user name or bad password.", 
+				Environment.NewLine
+			);
 
 			Then_message(Is.Empty);
 
