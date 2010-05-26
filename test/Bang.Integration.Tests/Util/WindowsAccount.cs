@@ -21,6 +21,17 @@ namespace Bang.Integration.Tests.Util {
 			return newUser;
 		}
 
+		public static Boolean Delete(NetworkCredential who) {
+			if (false == Exists(who))
+				return false;
+
+			var theUser = Get(who, LocalComputer());
+
+			LocalComputer().Children.Remove(theUser);
+
+			return true;
+		}
+
 		private static DirectoryEntry Add(NetworkCredential who) {
 			var localComputer = LocalComputer();
 			var user = localComputer.Children.Add(who.UserName, "user");
