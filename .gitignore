@@ -1,4 +1,5 @@
-bin/
+src/**/bin/
+test/**/bin/
 debug/
 obj/
 out/
