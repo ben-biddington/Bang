@@ -12,7 +12,7 @@ Examples
 
 See: [the executable examples][1]	
 
-### List all shares
+### List all connections
 
     Net.List();
 	
