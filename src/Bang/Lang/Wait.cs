@@ -13,7 +13,7 @@ namespace Bang.Lang {
 
 			if (false == process.HasExited) {
 				process.Kill();
-				process.WaitForExit();
+				process.WaitForExit(timeoutInMilliseconds);
 
 				throw new TimeoutException(
 					String.Format(

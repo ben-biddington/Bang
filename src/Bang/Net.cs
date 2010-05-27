@@ -32,6 +32,10 @@ namespace Bang {
 		public static NetResult Share(String name, DirectoryInfo dir) {
 			return Core.Use.Share(name, dir);
 		}
+
+		public static NetResult UnShare(String name) {
+			return Core.Use.Unshare(name);
+		}
 	}
 
 	public static partial class Net {

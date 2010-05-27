@@ -71,19 +71,33 @@ namespace Bang.Integration.Tests.Core {
 		[TestFixtureTearDown]
 		public void FinalTearDown() {
 			if (Clean) {
-				Console.WriteLine("Deleting user: {0}\\{1}", Who.Domain, Who.UserName);
-				WindowsAccount.Delete(Who);
+				Delete(Who);
 
-				if (Net.Contains(Resource)) {
-					Console.WriteLine("Deleting share: {0}", Resource);
-					Net.Delete(Resource);
-				}
+				Disconnect(Resource);
 
-				if (TestSharedDir.Exists) {
-					Console.WriteLine("Deleting temp directory: {0}", TestSharedDir.FullName);
-					TestSharedDir.Delete(true);
-				}
+				Delete(TestSharedDir);
+
+				Net.UnShare(EXAMPLE_SHARE_NAME);
 			}
+		}
+
+		private void Delete(DirectoryInfo what) {
+			if (what.Exists) {
+				Console.WriteLine("Deleting temp directory: {0}", what.FullName);
+				what.Delete(true);
+			}
+		}
+
+		private void Disconnect(String resource) {
+			if (Net.Contains(resource)) {
+				Console.WriteLine("Disconnecting: {0}", resource);
+				Net.Delete(resource);
+			}
+		}
+
+		private void Delete(NetworkCredential who) {
+			Console.WriteLine("Deleting user: {0}\\{1}", who.Domain, who.UserName);
+			WindowsAccount.Delete(who);
 		}
 
 		[Test]
@@ -118,7 +132,7 @@ namespace Bang.Integration.Tests.Core {
 		
 		[Test, Ignore("PENDING")]
 		public void Can_add_a_connection_that_user_does_not_have_read_permissions_on() {
-			Assert.Fail("PENDING");
+			Assert.Fail("PENDING: Looking for that access denied message.");
 		}
 
 		[Test]

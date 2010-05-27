@@ -57,6 +57,10 @@ namespace Bang.Core {
 			return Run("share {0}", String.Format("\"{0}\"=\"{1}\"", name, dir.FullName));
 		}
 
+		public static NetResult Unshare(string name) {
+			return Run("share \"{0}\" /d", name);
+		}
+
 		private static NetResult Run(String arguments, params Object[] args) {
 			var theArgs = String.Format(arguments, args);
 			
