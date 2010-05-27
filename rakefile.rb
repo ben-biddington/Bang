@@ -28,7 +28,7 @@ nunit :integration_test do |nunit|
 	puts "Working directory: #{working_dir}"
 	puts "Output directory: #{out_dir}"
 	
-	nunit.path_to_command = "#{working_dir}/bin/nunit-console.exe"
+	nunit.path_to_command = "#{working_dir}/bin/nunit/nunit-console.exe"
 	nunit.assemblies "#{working_dir}/test/Bang.Integration.Tests/bin/#{release_or_debug}/Bang.Integration.Tests.dll"
 	
 	# See: http://www.nunit.org/index.php/docs/docs/2.5.2/files/index.php?p=consoleCommandLine&r=2.4
