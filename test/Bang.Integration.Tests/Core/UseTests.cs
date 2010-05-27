@@ -77,27 +77,8 @@ namespace Bang.Integration.Tests.Core {
 
 				Delete(TestSharedDir);
 
-				Net.UnShare(EXAMPLE_SHARE_NAME);
+				Unshare(EXAMPLE_SHARE_NAME);
 			}
-		}
-
-		private void Delete(DirectoryInfo what) {
-			if (what.Exists) {
-				Console.WriteLine("Deleting temp directory: {0}", what.FullName);
-				what.Delete(true);
-			}
-		}
-
-		private void Disconnect(String resource) {
-			if (Net.Contains(resource)) {
-				Console.WriteLine("Disconnecting: {0}", resource);
-				Net.Delete(resource);
-			}
-		}
-
-		private void Delete(NetworkCredential who) {
-			Console.WriteLine("Deleting user: {0}\\{1}", who.Domain, who.UserName);
-			WindowsAccount.Delete(who);
 		}
 
 		[Test]
@@ -336,6 +317,29 @@ namespace Bang.Integration.Tests.Core {
 
 		private Boolean There_are_no_processes_running() {
 			return System.Diagnostics.Process.GetProcessesByName("net").Length == 0;
+		}
+
+		private void Unshare(String shareName) {
+			Net.UnShare(shareName);
+		}
+
+		private void Delete(DirectoryInfo what) {
+			if (what.Exists) {
+				Console.WriteLine("Deleting temp directory: {0}", what.FullName);
+				what.Delete(true);
+			}
+		}
+
+		private void Disconnect(String resource) {
+			if (Net.Contains(resource)) {
+				Console.WriteLine("Disconnecting: {0}", resource);
+				Net.Delete(resource);
+			}
+		}
+
+		private void Delete(NetworkCredential who) {
+			Console.WriteLine("Deleting user: {0}\\{1}", who.Domain, who.UserName);
+			WindowsAccount.Delete(who);
 		}
 	}
 }
